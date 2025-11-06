@@ -1,0 +1,334 @@
+-- ============================================================
+-- 🌐 BASE DE DATOS MULTITENANT OPTIMIZADA v4.0
+-- José Ángel Espinoza Morales — Proyecto Barberías SaaS
+-- ============================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+DROP DATABASE IF EXISTS barberias_sas;
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE DATABASE IF NOT EXISTS barberias_sas
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE barberias_sas;
+
+-- ============================================================
+-- 1️⃣ BARBERÍAS
+-- ============================================================
+CREATE TABLE barberias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    fecha_creacion DATE DEFAULT (CURRENT_DATE),
+    logo_url VARCHAR(255),
+    banner_url VARCHAR(255),
+    url_website VARCHAR(255),
+    facebook_url VARCHAR(255),
+    instagram_url VARCHAR(255),
+    twitter_url VARCHAR(255),
+    dias_abiertos VARCHAR(100),
+    feriados JSON,
+    estado_activo BOOLEAN DEFAULT TRUE,
+    UNIQUE(nombre),
+    UNIQUE(slug),
+    INDEX idx_barberias_slug (slug)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 2️⃣ SUCURSALES
+-- ============================================================
+CREATE TABLE sucursales (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    direccion VARCHAR(255),
+    ciudad VARCHAR(100),
+    telefono VARCHAR(20),
+    estado_activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    INDEX idx_sucursales_barberia (barberia_id)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 3️⃣ USUARIOS
+-- ============================================================
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    sucursal_id INT NULL,
+    tipo ENUM('dueño','administrativo','barbero','recepcionista','cliente') NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    alias VARCHAR(50),
+    celular VARCHAR(20),
+    correo VARCHAR(100),
+    contrasena_hash VARCHAR(255),
+    fecha_nacimiento DATE,
+    genero ENUM('M','F','O','N'),
+    puntos_fidelidad INT DEFAULT 0,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    estado_activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE SET NULL,
+    UNIQUE(barberia_id, correo),
+    INDEX idx_usuarios_barberia (barberia_id),
+    INDEX idx_usuarios_tipo (tipo),
+    INDEX idx_usuarios_celular (celular),
+    INDEX idx_usuarios_puntos (puntos_fidelidad DESC),
+    INDEX idx_usuarios_activos (estado_activo)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 4️⃣ CATEGORÍAS DE CATÁLOGO
+-- ============================================================
+CREATE TABLE categorias_catalogo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    icono VARCHAR(50),
+    orden INT DEFAULT 0,
+    estado_activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    UNIQUE(barberia_id, nombre),
+    INDEX idx_categorias_barberia (barberia_id),
+    INDEX idx_categorias_estado (estado_activo)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 5️⃣ CATÁLOGOS
+-- ============================================================
+CREATE TABLE catalogos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    categoria_id INT,
+    tipo ENUM('corte','producto','servicio') NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    precio DECIMAL(10,2) NOT NULL,
+    precio_descuento DECIMAL(10,2),
+    duracion_minutos INT NULL,
+    url_imagen VARCHAR(255),
+    requiere_barbero BOOLEAN DEFAULT TRUE,
+    estado_activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (categoria_id) REFERENCES categorias_catalogo(id) ON DELETE SET NULL,
+    INDEX idx_catalogos_barberia (barberia_id),
+    INDEX idx_catalogos_tipo (tipo),
+    INDEX idx_catalogos_categoria (categoria_id),
+    INDEX idx_catalogos_precio (precio),
+    INDEX idx_catalogos_nombre (nombre),
+    INDEX idx_catalogos_activos (barberia_id, estado_activo)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 6️⃣ PROMOCIONES
+-- ============================================================
+CREATE TABLE promociones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    tipo ENUM('desc_porcentaje','desc_fijo','gratis','puntos') NOT NULL,
+    valor DECIMAL(10,2),
+    puntos_requeridos INT,
+    aplicable_a ENUM('todos','categoria','item') DEFAULT 'item',
+    fecha_inicio DATE,
+    fecha_fin DATE,
+    max_usos INT,
+    estado_activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    INDEX idx_promociones_barberia (barberia_id),
+    INDEX idx_promociones_fechas (fecha_inicio, fecha_fin),
+    INDEX idx_promociones_estado (estado_activo)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 7️⃣ PROMOCIONES ↔ CATÁLOGOS
+-- ============================================================
+CREATE TABLE promociones_catalogos (
+    promocion_id INT NOT NULL,
+    catalogo_id INT NOT NULL,
+    PRIMARY KEY (promocion_id, catalogo_id),
+    FOREIGN KEY (promocion_id) REFERENCES promociones(id) ON DELETE CASCADE,
+    FOREIGN KEY (catalogo_id) REFERENCES catalogos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 8️⃣ CITAS
+-- ============================================================
+CREATE TABLE citas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    sucursal_id INT,
+    cliente_id INT NOT NULL,
+    barbero_id INT,
+    catalogo_id INT,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    estado ENUM('pendiente','confirmada','cancelada','asistida','no_asistio') DEFAULT 'pendiente',
+    puntos_otorgados INT DEFAULT 0,
+    notas TEXT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE SET NULL,
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (barbero_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+    FOREIGN KEY (catalogo_id) REFERENCES catalogos(id) ON DELETE SET NULL,
+    UNIQUE idx_citas_unicas (barberia_id, barbero_id, fecha, hora),
+    INDEX idx_citas_disponibilidad (barberia_id, sucursal_id, barbero_id, fecha, hora),
+    INDEX idx_citas_barbero_fecha (barbero_id, fecha),
+    INDEX idx_citas_cliente (cliente_id),
+    INDEX idx_citas_estado (estado)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 9️⃣ BOLETAS
+-- ============================================================
+CREATE TABLE boletas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    sucursal_id INT,
+    cita_id INT,
+    cliente_id INT NOT NULL,
+    metodo_pago ENUM('EFECTIVO','YAPE','PLIN','TARJETA','TRANSFERENCIA') NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    descuento DECIMAL(10,2) DEFAULT 0,
+    total DECIMAL(10,2) NOT NULL,
+    puntos_usados INT DEFAULT 0,
+    puntos_ganados INT DEFAULT 0,
+    estado ENUM('emitida','anulada') DEFAULT 'emitida',
+    fecha_emision TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE SET NULL,
+    FOREIGN KEY (cita_id) REFERENCES citas(id) ON DELETE SET NULL,
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    INDEX idx_boletas_barberia (barberia_id),
+    INDEX idx_boletas_cliente (cliente_id),
+    INDEX idx_boletas_fecha (fecha_emision DESC),
+    INDEX idx_boletas_barberia_fecha (barberia_id, fecha_emision DESC)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 🔟 DETALLE DE BOLETAS
+-- ============================================================
+CREATE TABLE boletas_detalle (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    boleta_id INT NOT NULL,
+    catalogo_id INT NOT NULL,
+    cantidad INT DEFAULT 1,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (boleta_id) REFERENCES boletas(id) ON DELETE CASCADE,
+    FOREIGN KEY (catalogo_id) REFERENCES catalogos(id) ON DELETE CASCADE,
+    INDEX idx_detalle_boleta (boleta_id),
+    INDEX idx_detalle_catalogo (catalogo_id)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 11️⃣ CONFIGURACIONES
+-- ============================================================
+CREATE TABLE configuraciones (
+    barberia_id INT PRIMARY KEY,
+    mostrar_logo BOOLEAN DEFAULT TRUE,
+    mostrar_direccion BOOLEAN DEFAULT TRUE,
+    mostrar_telefono BOOLEAN DEFAULT TRUE,
+    mostrar_web BOOLEAN DEFAULT TRUE,
+    mensaje_pie_recibo VARCHAR(255),
+    color_primario VARCHAR(7) DEFAULT '#1a1a1a',
+    color_secundario VARCHAR(7) DEFAULT '#ff6b00',
+    idioma VARCHAR(5) DEFAULT 'es',
+    usar_fidelidad BOOLEAN DEFAULT TRUE,
+    usar_promociones BOOLEAN DEFAULT TRUE,
+    usar_citas BOOLEAN DEFAULT TRUE,
+    usar_boletas BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 12️⃣ LOGS
+-- ============================================================
+CREATE TABLE logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    usuario_id INT,
+    nivel ENUM('INFO','WARN','ERROR') DEFAULT 'INFO',
+    accion VARCHAR(100) NOT NULL,
+    detalle TEXT,
+    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+    INDEX idx_logs_barberia_fecha (barberia_id, fecha DESC)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- 13️⃣ RECLAMOS
+-- ============================================================
+CREATE TABLE reclamos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    barberia_id INT NOT NULL,
+    cliente_id INT,
+    titulo VARCHAR(100) NOT NULL,
+    descripcion TEXT NOT NULL,
+    respuesta TEXT,
+    respondido_por INT,
+    fecha_respuesta TIMESTAMP NULL,
+    estado ENUM('pendiente','resuelto','cerrado') DEFAULT 'pendiente',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+    FOREIGN KEY (respondido_por) REFERENCES usuarios(id) ON DELETE SET NULL,
+    INDEX idx_reclamos_barberia (barberia_id),
+    INDEX idx_reclamos_fecha (fecha_creacion DESC)
+) ENGINE=InnoDB;
+
+-- ============================================================
+-- ⚙️ TRIGGERS AUTOMÁTICOS
+-- ============================================================
+DELIMITER //
+
+-- 🧾 Actualiza total automáticamente
+CREATE TRIGGER trg_boletas_calc_total
+BEFORE INSERT ON boletas
+FOR EACH ROW
+BEGIN
+    SET NEW.total = NEW.subtotal - NEW.descuento;
+END//
+
+CREATE TRIGGER trg_boletas_update_total
+BEFORE UPDATE ON boletas
+FOR EACH ROW
+BEGIN
+    SET NEW.total = NEW.subtotal - NEW.descuento;
+END//
+
+-- ⭐ Actualiza puntos de fidelidad al emitir boleta
+CREATE TRIGGER trg_update_puntos_fidelidad
+AFTER INSERT ON boletas
+FOR EACH ROW
+BEGIN
+    IF NEW.estado = 'emitida' THEN
+        UPDATE usuarios
+        SET puntos_fidelidad = puntos_fidelidad + NEW.puntos_ganados - NEW.puntos_usados
+        WHERE id = NEW.cliente_id;
+    END IF;
+END//
+
+DELIMITER ;
+
+-- ============================================================
+-- 👑 VISTA DINÁMICA: NIVEL DE FIDELIDAD
+-- ============================================================
+CREATE OR REPLACE VIEW v_usuarios_fidelidad AS
+SELECT
+    u.*,
+    CASE
+        WHEN u.puntos_fidelidad >= 1000 THEN 'platino'
+        WHEN u.puntos_fidelidad >= 500 THEN 'oro'
+        WHEN u.puntos_fidelidad >= 200 THEN 'plata'
+        ELSE 'bronce'
+    END AS nivel_fidelidad
+FROM usuarios u;
+
+-- ============================================================
+-- ✅ FIN DE SCRIPT v4.0 — 13 TABLAS + 3 TRIGGERS + 1 VISTA
+-- ============================================================
