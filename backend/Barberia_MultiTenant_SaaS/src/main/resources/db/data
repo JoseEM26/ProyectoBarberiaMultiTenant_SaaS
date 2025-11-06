@@ -1,0 +1,103 @@
+-- ============================================================
+-- DATOS DE PRUEBA PARA barberias_sas
+-- Compatible con tu schema v4.0 + entidades R2DBC
+-- Ejecuta después del CREATE TABLE
+-- ============================================================
+
+-- 1. BARBERÍAS
+INSERT INTO barberias (nombre, slug, descripcion, logo_url, banner_url, url_website, facebook_url, instagram_url, twitter_url, dias_abiertos, feriados) VALUES
+('Barbería Elite', 'elite-cutz', 'Los mejores cortes en Lima', 'https://img.logo/elite.png', 'https://img.banner/elite.jpg', 'https://elitecutz.pe', 'https://fb.com/elitecutz', 'https://ig.com/elitecutz', 'https://x.com/elitecutz', 'Lunes a Sábado', '{"2025-12-25": "Navidad", "2025-01-01": "Año Nuevo"}'),
+('Corte & Estilo', 'corte-estilo', 'Estilo moderno y clásico', 'https://img.logo/corte.png', 'https://img.banner/corte.jpg', 'https://corteestilo.pe', 'https://fb.com/corteestilo', 'https://ig.com/corteestilo', null, 'Martes a Domingo', '{"2025-07-28": "Fiestas Patrias"}');
+
+-- 2. SUCURSALES
+INSERT INTO sucursales (barberia_id, nombre, direccion, ciudad, telefono) VALUES
+(1, 'Sucursal Miraflores', 'Av. Larco 123', 'Lima', '987654321'),
+(1, 'Sucursal San Isidro', 'Calle Los Pinos 456', 'Lima', '998877665'),
+(2, 'Sucursal Surco', 'Av. Primavera 789', 'Lima', '912345678');
+
+-- 3. USUARIOS
+INSERT INTO usuarios (barberia_id, sucursal_id, tipo, nombre, apellido, alias, celular, correo, contrasena_hash, fecha_nacimiento, genero) VALUES
+-- Dueños
+(1, NULL, 'dueño', 'José', 'Espinoza', 'joseadmin', '987654321', 'jose@elitecutz.pe', '$2a$10$XURP2vK8Y3z9QwErT6vF/.fakehash123', '1985-03-15', 'M'),
+(2, NULL, 'dueño', 'Carlos', 'Ramírez', 'carlosadmin', '987654322', 'carlos@corteestilo.pe', '$2a$10$XURP2vK8Y3z9QwErT6vF/.fakehash456', '1988-07-22', 'M'),
+
+-- Barberos
+(1, 1, 'barbero', 'Luis', 'Gómez', 'luisbarber', '987654323', 'luis@elitecutz.pe', '$2a$10$hash', '1990-11-10', 'M'),
+(1, 1, 'barbero', 'Miguel', 'Torres', 'miguelpro', '987654324', 'miguel@elitecutz.pe', '$2a$10$hash', '1992-05-05', 'M'),
+(1, 2, 'barbero', 'Ana', 'López', 'anastyle', '987654325', 'ana@elitecutz.pe', '$2a$10$hash', '1995-08-18', 'F'),
+(2, 3, 'barbero', 'Pedro', 'Vargas', 'pedrocorte', '987654326', 'pedro@corteestilo.pe', '$2a$10$hash', '1987-12-01', 'M'),
+
+-- Clientes
+(1, NULL, 'cliente', 'Juan', 'Pérez', 'juanp', '987654327', 'juan.perez@gmail.com', '$2a$10$hash', '1993-04-20', 'M'),
+(1, NULL, 'cliente', 'María', 'Sánchez', 'marias', '987654328', 'maria.s@gmail.com', '$2a$10$hash', '1996-09-12', 'F'),
+(2, NULL, 'cliente', 'Diego', 'Morales', 'diegom', '987654329', 'diego.m@gmail.com', '$2a$10$hash', '1991-06-30', 'M');
+
+-- 4. CATEGORÍAS DE CATÁLOGO
+INSERT INTO categorias_catalogo (barberia_id, nombre, icono, orden) VALUES
+(1, 'Cortes Clásicos', 'scissors', 1),
+(1, 'Cortes Modernos', 'razor', 2),
+(1, 'Afeitado', 'shave', 3),
+(1, 'Productos', 'bottle', 4),
+(2, 'Cortes', 'cut', 1),
+(2, 'Color', 'dye', 2);
+
+-- 5. CATÁLOGOS
+INSERT INTO catalogos (barberia_id, categoria_id, tipo, nombre, descripcion, precio, precio_descuento, duracion_minutos, url_imagen, requiere_barbero) VALUES
+-- Elite Cutz
+(1, 1, 'corte', 'Corte Clásico', 'Tijera y máquina', 35.00, 30.00, 30, 'https://img/corte-clasico.jpg', TRUE),
+(1, 1, 'corte', 'Corte Degradado', 'Fade perfecto', 40.00, NULL, 40, 'https://img/fade.jpg', TRUE),
+(1, 2, 'corte', 'Corte Skin Fade', 'Afeitado al ras', 45.00, 40.00, 45, 'https://img/skinfade.jpg', TRUE),
+(1, 3, 'servicio', 'Afeitado Clásico', 'Navaja y espuma', 25.00, NULL, 20, 'https://img/afeitado.jpg', TRUE),
+(1, 4, 'producto', 'Cera Premium', 'Fijación fuerte', 50.00, 45.00, NULL, 'https://img/cera.jpg', FALSE),
+
+-- Corte & Estilo
+(2, 5, 'corte', 'Corte Básico', 'Estilo simple', 30.00, NULL, 25, 'https://img/basico.jpg', TRUE),
+(2, 6, 'servicio', 'Tinte Completo', 'Color permanente', 80.00, 70.00, 90, 'https://img/tinte.jpg', TRUE);
+
+-- 6. PROMOCIONES
+INSERT INTO promociones (barberia_id, nombre, tipo, valor, puntos_requeridos, aplicable_a, categoria_id, fecha_inicio, fecha_fin, max_usos) VALUES
+(1, 'Lunes de Descuento', 'desc_porcentaje', 20.00, NULL, 'todos', NULL, '2025-11-10', '2025-12-31', 50),
+(1, 'Promo Fade', 'desc_fijo', 5.00, NULL, 'item', NULL, '2025-11-06', '2025-11-30', 30),
+(1, 'Puntos Dobles', 'puntos', NULL, 200, 'todos', NULL, '2025-11-15', '2025-11-20', 100),
+(2, 'Cliente Nuevo', 'desc_porcentaje', 15.00, NULL, 'todos', NULL, '2025-11-01', '2025-11-30', 20);
+
+-- 7. PROMOCIONES ↔ CATÁLOGOS
+INSERT INTO promociones_catalogos (promocion_id, catalogo_id) VALUES
+(2, 3),  -- Promo Fade → Corte Skin Fade
+(1, 1),  -- Lunes → Corte Clásico
+(1, 2);  -- Lunes → Corte Degradado
+
+-- 8. CITAS
+INSERT INTO citas (barberia_id, sucursal_id, cliente_id, barbero_id, catalogo_id, fecha, hora, estado, notas) VALUES
+(1, 1, 7, 3, 1, '2025-11-10', '10:00:00', 'pendiente', 'Corte clásico'),
+(1, 1, 8, 3, 3, '2025-11-11', '14:30:00', 'confirmada', 'Skin fade bajo'),
+(1, 2, 7, 5, 2, '2025-11-12', '16:00:00', 'pendiente', 'Degradado medio'),
+(2, 3, 9, 6, 6, '2025-11-13', '11:00:00', 'pendiente', 'Corte básico');
+
+-- 9. CONFIGURACIONES
+INSERT INTO configuraciones (barberia_id, mensaje_pie_recibo, color_primario, color_secundario) VALUES
+(1, '¡Gracias por tu preferencia!', '#1a1a1a', '#ff6b00'),
+(2, 'Vuelve pronto', '#2c3e50', '#e74c3c');
+
+-- 10. BOLETAS (con trigger que actualiza total y puntos)
+INSERT INTO boletas (barberia_id, sucursal_id, cita_id, cliente_id, metodo_pago, subtotal, descuento, total, puntos_usados, puntos_ganados, estado) VALUES
+(1, 1, 1, 7, 'EFECTIVO', 35.00, 7.00, 28.00, 0, 3, 'emitida'),  -- 20% descuento (Lunes)
+(1, 1, 2, 8, 'YAPE', 45.00, 5.00, 40.00, 0, 4, 'emitida'),     -- $5 off (Promo Fade)
+(2, 3, 4, 9, 'TARJETA', 30.00, 4.50, 25.50, 0, 3, 'emitida');   -- 15% cliente nuevo
+
+-- 11. DETALLE DE BOLETAS
+INSERT INTO boletas_detalle (boleta_id, catalogo_id, cantidad, precio_unitario, subtotal) VALUES
+(1, 1, 1, 35.00, 35.00),
+(2, 3, 1, 45.00, 45.00),
+(3, 6, 1, 30.00, 30.00);
+
+-- 12. LOGS
+INSERT INTO logs (barberia_id, usuario_id, nivel, accion, detalle) VALUES
+(1, 1, 'INFO', 'Login', 'Dueño inició sesión'),
+(1, 3, 'INFO', 'Cita creada', 'Cita para Juan Pérez'),
+(2, 2, 'WARN', 'Pago fallido', 'Intento de pago con tarjeta rechazada');
+
+-- 13. RECLAMOS
+INSERT INTO reclamos (barberia_id, cliente_id, titulo, descripcion, estado) VALUES
+(1, 7, 'Corte desigual', 'El degradado quedó más alto de un lado', 'pendiente'),
+(1, 8, 'Buen servicio', 'Todo perfecto, gracias Ana', 'resuelto');

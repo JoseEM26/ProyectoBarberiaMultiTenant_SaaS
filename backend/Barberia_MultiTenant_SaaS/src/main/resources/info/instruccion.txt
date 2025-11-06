@@ -1,0 +1,147 @@
+# 📘 INSTRUCCIONES DETALLADAS — SISTEMA DE GESTIÓN DE BARBERÍA (FULL STACK)
+
+## 1️⃣ OBJETIVO GENERAL
+Desarrollar un sistema integral para la gestión completa de una barbería moderna: registro de citas, control de clientes, gestión de barberos, emisión de boletas, configuración visual del recibo impreso (impresora térmica), y personalización del negocio (logo, nombre, colores, URL del website, etc.).
+El sistema debe ser rápido, modular, escalable y fácil de mantener.
+
+---
+
+## 2️⃣ OBJETIVOS ESPECÍFICOS
+- Crear una base de datos optimizada con índices estratégicos.
+- Implementar un backend escalable en **Spring Boot** con endpoints inteligentes.
+- Desarrollar un frontend en **Angular** con caché y renderizado eficiente.
+- Permitir la **personalización completa del ticket térmico**.
+- Configurar un sistema de autenticación seguro (JWT o sesión).
+- Minimizar las peticiones al backend mediante almacenamiento en caché.
+- Preparar el sistema para un despliegue futuro en **Render** o **AWS**.
+- Garantizar bajo consumo de recursos y alta velocidad de respuesta.
+
+---
+
+## 3️⃣ ARQUITECTURA GENERAL
+El proyecto seguirá una arquitectura **monolítica modular** en esta primera fase, con posibilidad de migrar a microservicios más adelante.
+La estructura se dividirá en **capas bien separadas**:
+
+### 🧩 Backend (Spring Boot)
+- **Capa Controller**: manejar las peticiones REST y enviar respuestas optimizadas.
+- **Capa Service**: contener toda la lógica de negocio.
+- **Model**:
+- **Capa Repository (JPA)**: manejar acceso a la base de datos con consultas personalizadas e índices.
+- **Capa DTOs**: para manejar datos combinados y optimizar respuestas al frontend.
+- **Configuración global**: manejo de caché, logging, cors, y manejo de errores centralizado.
+
+### 🧠 Frontend (Angular)
+- **Módulos**: `DashboardModule`, `CitasModule`, `ClientesModule`, `ConfiguracionModule`, `UsuariosModule`, etc.
+- **Componentes**: formularios reactivos, listas, modales, vistas de impresión.
+- **Caché local**: uso de `BehaviorSubject`, `LocalStorage` y `Service Workers` para minimizar peticiones.
+- **Diseño responsive y limpio** con Tailwind o Angular Material.
+- **Configuración visual del ticket** editable desde el panel de configuración.
+
+---
+========================================================
+PROYECTO SAS MULTITENANT PARA BARBERÍAS
+========================================================
+
+OBJETIVO DEL PROYECTO:
+- Crear un sistema web interactivo para barberías y peluquerías.
+- Permitir múltiples barberías (tenants) usando la misma infraestructura.
+- Cada barbería puede tener su propia configuración de dashboard, promociones, catálogo, cortes y servicios.
+- Incluir funcionalidades opcionales como boletas, fidelización, asignación de citas, y registro de clientes.
+- Integrar IA para reconocimiento facial y personalización del catálogo de cortes.
+- Escalable y económico, con posibilidad de migrar a AWS o servicios más robustos en el futuro.
+
+- Buenas prácticas:
+  - Indices en columnas de búsqueda frecuente: cliente_id, barberia_id, fecha, estado.
+  - Normalización para evitar datos duplicados.
+  - Guardar imágenes **como URLs** en Cloudinary o Firebase Storage, evitando Base64 en la DB.
+
+--------------------------------------------------------
+2. BACKEND (Spring Boot)
+--------------------------------------------------------
+- API RESTful que maneja todas las operaciones CRUD.
+- Endpoints principales:
+  - /api/barberias → información y configuración
+  - /api/clientes → gestión de clientes
+  - /api/cortes → catálogo de cortes y productos
+  - /api/promociones → gestión de promociones
+  - /api/boletas → generación de boletas y detalles
+  - /api/citas → asignación y reserva de citas
+  - /api/configuracion-completa → devuelve un JSON completo con todas las configuraciones de barbería (cacheable)
+  - /api/logs → registrar actividad
+  - /api/reclamos → gestionar libro de reclamos
+
+- Buenas prácticas:
+  - Uso de **@Cacheable** en endpoints que devuelven configuraciones para reducir peticiones.
+  - Validaciones de datos y control de errores.
+  - Seguridad: JWT o session management si es necesario para usuarios administrativos.
+  - Integración con IA (Python/FastAPI) mediante endpoints separados o microservicio independiente.
+  - Manejo de transacciones en operaciones que involucren boletas y puntos de fidelidad.
+
+--------------------------------------------------------
+3. FRONTEND (Angular 20)
+--------------------------------------------------------
+- Dashboard interactivo basado en configuración recibida desde backend.
+- Componentes del Dashboard que se pueden mostrar u ocultar según barbería:
+  - Fidelidad de cortes
+  - Mejor cliente
+  - Promociones activas
+  - Gráficos de ventas
+- Catálogo de cortes y productos renderizado dinámicamente.
+- Reservas de citas con selección de barbero, fecha y hora.
+- Manejo de cache en frontend para evitar múltiples peticiones (RxJS BehaviorSubject).
+- Conexión con backend y microservicio de IA vía HTTP.
+
+--------------------------------------------------------
+4. DESPLIEGUE
+--------------------------------------------------------
+- Backend y base de datos: **Render** (gratis o plan económico), por ahora una instancia compartida para todas las barberías.
+- Frontend Angular: desplegado también en Render o servicio estático (Netlify/Vercel opcional).
+- Almacenamiento de imágenes: **Cloudinary o Firebase Storage**, guardar solo URLs en DB.
+- Dominio:
+  - Render puede ofrecer dominio gratuito con subdominio.
+  - Para dominio personalizado: comprar en Namecheap, GoDaddy o similar y apuntar al deploy.
+- Escalabilidad:
+  - Inicial: pocas barberías, costos bajos, DB compartida.
+  - Futuro: migrar a AWS o GCP si se requiere más capacidad, separar base de datos por tenant si es necesario.
+
+--------------------------------------------------------
+5. BUENAS PRÁCTICAS
+--------------------------------------------------------
+- Usar cache para endpoints pesados (configuración, catálogos).
+- Evitar Base64 en DB, almacenar imágenes en la nube.
+- Indices en columnas de filtrado frecuente.
+- Transacciones para operaciones críticas (boletas, puntos de fidelidad).
+- Microservicios: IA en Python/FastAPI independiente.
+- Versionar configuración y logs de actividad.
+- Backup periódico de DB y almacenamiento en cloud.
+- Peticiones mínimas: cargar configuración completa en 1 petición y usar cache local.
+
+--------------------------------------------------------
+6. NOTAS IMPORTANTES
+--------------------------------------------------------
+- Sistema multitena (multi-tenant) con una sola DB compartida inicialmente.
+- Dashboard configurable: cada barbería puede activar/desactivar secciones.
+- Catálogo dinámico con secciones, cortes y productos.
+- Promociones flexibles: corte gratis, descuento, producto gratis, combinables.
+- Boletas con detalle por cliente y puntos de fidelidad.
+- Citas con asignación de barbero, fecha y hora.
+- Logs de actividad y historial de cambios para auditoría.
+- URLs de imágenes y banners almacenados en la nube.
+- Reservas, fidelidad, promociones y boletas opcionales según barbería.
+- Escalable y económico, con posibilidad de migración a AWS si aumenta la demanda.
+
+========================================================
+ENUM UTILIZADOS
+========================================================
+
+Enum,Valores
+UsuarioTipo,"dueño, administrativo, barbero, recepcionista, cliente"
+Genero,"M, F, O, N"
+CatalogoTipo,"corte, producto, servicio"
+PromocionTipo,"desc_porcentaje, desc_fijo, gratis, puntos"
+AplicableA,"todos, categoria, item"
+CitaEstado,"pendiente, confirmada, cancelada, asistida, no_asistio"
+MetodoPago,"EFECTIVO, YAPE, PLIN, TARJETA, TRANSFERENCIA"
+BoletaEstado,"emitida, anulada"
+NivelLog,"INFO, WARN, ERROR"
+ReclamoEstado,"pendiente, resuelto, cerrado"

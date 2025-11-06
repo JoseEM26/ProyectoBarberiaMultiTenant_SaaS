@@ -1,0 +1,8 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/barberias_sas
+    username: root
+    password: mysql
+    pool:
+      enabled: true
+      max-size: 20

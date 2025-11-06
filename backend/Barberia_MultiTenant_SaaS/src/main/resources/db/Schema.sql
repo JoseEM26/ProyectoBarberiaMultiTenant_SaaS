@@ -60,6 +60,7 @@ CREATE TABLE usuarios (
     sucursal_id INT NULL,
     tipo ENUM('dueño','administrativo','barbero','recepcionista','cliente') NOT NULL,
     nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
     alias VARCHAR(50),
     celular VARCHAR(20),
     correo VARCHAR(100),
@@ -132,14 +133,17 @@ CREATE TABLE promociones (
     valor DECIMAL(10,2),
     puntos_requeridos INT,
     aplicable_a ENUM('todos','categoria','item') DEFAULT 'item',
+    categoria_id INT NULL,
     fecha_inicio DATE,
     fecha_fin DATE,
     max_usos INT,
     estado_activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (barberia_id) REFERENCES barberias(id) ON DELETE CASCADE,
+    FOREIGN KEY (categoria_id) REFERENCES categorias_catalogo(id) ON DELETE SET NULL,
     INDEX idx_promociones_barberia (barberia_id),
     INDEX idx_promociones_fechas (fecha_inicio, fecha_fin),
-    INDEX idx_promociones_estado (estado_activo)
+    INDEX idx_promociones_estado (estado_activo),
+    INDEX idx_promociones_categoria (categoria_id)
 ) ENGINE=InnoDB;
 
 -- ============================================================

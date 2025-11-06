@@ -1,0 +1,761 @@
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Barberia.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("barberias")
+public class Barberia {
+
+    @Id
+    private Integer id;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("slug")
+    private String slug;
+
+    @Column("descripcion")
+    private String descripcion;
+
+    @Column("fecha_creacion")
+    private LocalDate fechaCreacion;
+
+    @Column("logo_url")
+    private String logoUrl;
+
+    @Column("banner_url")
+    private String bannerUrl;
+
+    @Column("url_website")
+    private String urlWebsite;
+
+    @Column("facebook_url")
+    private String facebookUrl;
+
+    @Column("instagram_url")
+    private String instagramUrl;
+
+    @Column("twitter_url")
+    private String twitterUrl;
+
+    @Column("dias_abiertos")
+    private String diasAbiertos;
+
+    @Column("feriados")
+    private JsonNode feriados;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Sucursal.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("sucursales")
+public class Sucursal {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("direccion")
+    private String direccion;
+
+    @Column("ciudad")
+    private String ciudad;
+
+    @Column("telefono")
+    private String telefono;
+
+    @Column("hora_apertura")
+    private LocalTime horaApertura;
+
+    @Column("hora_cierre")
+    private LocalTime horaCierre;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Usuario.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("usuarios")
+public class Usuario {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("sucursal_id")
+    private Integer sucursalId;
+
+    @Column("tipo")
+    private UsuarioTipo tipo;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("apellido")
+    private String apellido;
+
+    @Column("alias")
+    private String alias;
+
+    @Column("correo")
+    private String correo;
+
+    @Column("celular")
+    private String celular;
+
+    @Column("contrasena_hash")
+    private String contrasenaHash;
+
+    @Column("genero")
+    private Genero genero;
+
+    @Column("fecha_nacimiento")
+    private LocalDate fechaNacimiento;
+
+    @Column("fecha_registro")
+    private LocalDateTime fechaRegistro;
+
+    @Column("puntos_fidelidad")
+    @Builder.Default
+    private int puntosFidelidad = 0;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/UsuarioTipo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum UsuarioTipo {
+    dueño, administrativo, barbero, recepcionista, cliente
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Genero.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum Genero {
+    M, F, O, N
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/CategoriaCatalogo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("categorias_catalogo")
+public class CategoriaCatalogo {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("descripcion")
+    private String descripcion;
+
+    @Column("icono")
+    private String icono;
+
+    @Column("orden")
+    @Builder.Default
+    private int orden = 0;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Catalogo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.math.BigDecimal;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("catalogos")
+public class Catalogo {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("categoria_id")
+    private Integer categoriaId;
+
+    @Column("tipo")
+    private CatalogoTipo tipo;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("descripcion")
+    private String descripcion;
+
+    @Column("precio")
+    private BigDecimal precio;
+
+    @Column("precio_descuento")
+    private BigDecimal precioDescuento;
+
+    @Column("duracion_minutos")
+    private Integer duracionMinutos;
+
+    @Column("url_imagen")
+    private String urlImagen;
+
+    @Column("requiere_barbero")
+    @Builder.Default
+    private boolean requiereBarbero = true;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/CatalogoTipo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum CatalogoTipo {
+    corte, producto, servicio
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Promocion.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("promociones")
+public class Promocion {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("nombre")
+    private String nombre;
+
+    @Column("descripcion")
+    private String descripcion;
+
+    @Column("tipo")
+    private PromocionTipo tipo;
+
+    @Column("valor")
+    private BigDecimal valor;
+
+    @Column("puntos_requeridos")
+    private Integer puntosRequeridos;
+
+    @Column("aplicable_a")
+    private AplicableA aplicableA;
+
+    @Column("categoria_id")
+    private Integer categoriaId;
+
+    @Column("max_usos")
+    private Integer maxUsos;
+
+    @Column("usos_actuales")
+    @Builder.Default
+    private int usosActuales = 0;
+
+    @Column("fecha_inicio")
+    private LocalDate fechaInicio;
+
+    @Column("fecha_fin")
+    private LocalDate fechaFin;
+
+    @Column("estado_activo")
+    @Builder.Default
+    private boolean estadoActivo = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/PromocionTipo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum PromocionTipo {
+    desc_porcentaje, desc_fijo, gratis, puntos
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/AplicableA.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum AplicableA {
+    todos, categoria, item
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/PromocionCatalogo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("promociones_catalogos")
+public class PromocionCatalogo {
+
+    @Id
+    private PromocionCatalogoId id;
+
+    @Column("promocion_id")
+    private Integer promocionId;
+
+    @Column("catalogo_id")
+    private Integer catalogoId;
+
+    public PromocionCatalogo(Integer promocionId, Integer catalogoId) {
+        this.id = new PromocionCatalogoId(promocionId, catalogoId);
+        this.promocionId = promocionId;
+        this.catalogoId = catalogoId;
+    }
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/PromocionCatalogoId.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import java.io.Serializable;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
+public class PromocionCatalogoId implements Serializable {
+    private Integer promocionId;
+    private Integer catalogoId;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Cita.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("citas")
+public class Cita {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("sucursal_id")
+    private Integer sucursalId;
+
+    @Column("barbero_id")
+    private Integer barberoId;
+
+    @Column("cliente_id")
+    private Integer clienteId;
+
+    @Column("catalogo_id")
+    private Integer catalogoId;
+
+    @Column("fecha")
+    private LocalDate fecha;
+
+    @Column("hora")
+    private LocalTime hora;
+
+    @Column("duracion_minutos")
+    private Integer duracionMinutos;
+
+    @Column("estado")
+    @Builder.Default
+    private CitaEstado estado = CitaEstado.pendiente;
+
+    @Column("puntos_otorgados")
+    @Builder.Default
+    private int puntosOtorgados = 0;
+
+    @Column("notas")
+    private String notas;
+
+    @Column("fecha_creacion")
+    private java.time.LocalDateTime fechaCreacion;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/CitaEstado.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum CitaEstado {
+    pendiente, confirmada, cancelada, asistida, no_asistio
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Boleta.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("boletas")
+public class Boleta {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("sucursal_id")
+    private Integer sucursalId;
+
+    @Column("cita_id")
+    private Integer citaId;
+
+    @Column("cliente_id")
+    private Integer clienteId;
+
+    @Column("metodo_pago")
+    private MetodoPago metodoPago;
+
+    @Column("subtotal")
+    private BigDecimal subtotal;
+
+    @Column("descuento")
+    @Builder.Default
+    private BigDecimal descuento = BigDecimal.ZERO;
+
+    @Column("total")
+    private BigDecimal total;
+
+    @Column("puntos_usados")
+    @Builder.Default
+    private int puntosUsados = 0;
+
+    @Column("puntos_ganados")
+    @Builder.Default
+    private int puntosGanados = 0;
+
+    @Column("estado")
+    @Builder.Default
+    private BoletaEstado estado = BoletaEstado.emitida;
+
+    @Column("fecha_emision")
+    private LocalDateTime fechaEmision;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/MetodoPago.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum MetodoPago {
+    EFECTIVO, YAPE, PLIN, TARJETA, TRANSFERENCIA
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/BoletaEstado.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum BoletaEstado {
+    emitida, anulada
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/BoletaDetalle.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.math.BigDecimal;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("boletas_detalle")
+public class BoletaDetalle {
+
+    @Id
+    private Integer id;
+
+    @Column("boleta_id")
+    private Integer boletaId;
+
+    @Column("catalogo_id")
+    private Integer catalogoId;
+
+    @Column("cantidad")
+    @Builder.Default
+    private int cantidad = 1;
+
+    @Column("precio_unitario")
+    private BigDecimal precioUnitario;
+
+    @Column("subtotal")
+    private BigDecimal subtotal;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Configuracion.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("configuraciones")
+public class Configuracion {
+
+    @Id
+    private Integer barberiaId;
+
+    @Column("mostrar_logo")
+    @Builder.Default
+    private boolean mostrarLogo = true;
+
+    @Column("mostrar_direccion")
+    @Builder.Default
+    private boolean mostrarDireccion = true;
+
+    @Column("mostrar_telefono")
+    @Builder.Default
+    private boolean mostrarTelefono = true;
+
+    @Column("mostrar_web")
+    @Builder.Default
+    private boolean mostrarWeb = true;
+
+    @Column("mensaje_pie_recibo")
+    private String mensajePieRecibo;
+
+    @Column("color_primario")
+    @Builder.Default
+    private String colorPrimario = "#1a1a1a";
+
+    @Column("color_secundario")
+    @Builder.Default
+    private String colorSecundario = "#ff6b00";
+
+    @Column("idioma")
+    @Builder.Default
+    private String idioma = "es";
+
+    @Column("usar_fidelidad")
+    @Builder.Default
+    private boolean usarFidelidad = true;
+
+    @Column("usar_promociones")
+    @Builder.Default
+    private boolean usarPromociones = true;
+
+    @Column("usar_citas")
+    @Builder.Default
+    private boolean usarCitas = true;
+
+    @Column("usar_boletas")
+    @Builder.Default
+    private boolean usarBoletas = true;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Log.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("logs")
+public class Log {
+
+    @Id
+    private Long id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("usuario_id")
+    private Integer usuarioId;
+
+    @Column("nivel")
+    private NivelLog nivel;
+
+    @Column("accion")
+    private String accion;
+
+    @Column("detalle")
+    private String detalle;
+
+    @Column("fecha")
+    private LocalDateTime fecha;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/NivelLog.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum NivelLog {
+    INFO, WARN, ERROR
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/Reclamo.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("reclamos")
+public class Reclamo {
+
+    @Id
+    private Integer id;
+
+    @Column("barberia_id")
+    private Integer barberiaId;
+
+    @Column("cliente_id")
+    private Integer clienteId;
+
+    @Column("titulo")
+    private String titulo;
+
+    @Column("descripcion")
+    private String descripcion;
+
+    @Column("respuesta")
+    private String respuesta;
+
+    @Column("respondido_por")
+    private Integer respondidoPor;
+
+    @Column("estado")
+    @Builder.Default
+    private ReclamoEstado estado = ReclamoEstado.pendiente;
+
+    @Column("fecha_creacion")
+    private LocalDateTime fechaCreacion;
+
+    @Column("fecha_respuesta")
+    private LocalDateTime fechaRespuesta;
+}
+
+// src/main/java/com/Barberia/Barberia_MultiTenant_SaaS/model/ReclamoEstado.java
+package com.Barberia.Barberia_MultiTenant_SaaS.model;
+
+public enum ReclamoEstado {
+    pendiente, resuelto, cerrado
+}
